@@ -1,6 +1,7 @@
 import cron from "node-cron";
 import { runHealthCheckJob } from "@/jobs/health-check";
 import { runRetentionJob } from "@/jobs/retention";
+import { runCacheWarmupJob } from "@/jobs/cache-warmup";
 
 let started = false;
 
@@ -14,5 +15,9 @@ export function startScheduler() {
 
   cron.schedule("0 2 * * *", async () => {
     await runRetentionJob();
+  });
+
+  cron.schedule("0 */6 * * *", async () => {
+    await runCacheWarmupJob();
   });
 }

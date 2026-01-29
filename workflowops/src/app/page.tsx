@@ -37,32 +37,28 @@ export default function Home() {
         <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
           <a
             className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+            href="/dashboard"
           >
             <Image
               className="dark:invert"
               src="/vercel.svg"
-              alt="Vercel logomark"
+              alt="WorkflowOps"
               width={16}
               height={16}
             />
-            Deploy Now
+            Open Dashboard
           </a>
           <a
             className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+            href="/login"
           >
-            Documentation
+            Sign in
           </a>
           <a
             className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-emerald-400/30 px-5 text-emerald-200 transition-colors hover:border-emerald-400 hover:bg-emerald-500/10 md:w-[180px]"
-            href="/retention"
+            href="/register"
           >
-            Retention Policies
+            Create account
           </a>
         </div>
       </main>

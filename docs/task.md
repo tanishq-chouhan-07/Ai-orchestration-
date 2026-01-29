@@ -220,7 +220,7 @@
 - [ ] Set up Background Jobs (Node Cron)
   - [ ] `jobs/health-check.ts` (Instance monitoring)
   - [ ] `jobs/retention.ts` (Data pruning)
-  - [ ] `jobs/cache-warmup.ts` (optional)
+  - [x] `jobs/cache-warmup.ts` (optional)
 
 ---
 
@@ -229,70 +229,125 @@
 **Status:** ⏳ PENDING  
 **Deliverable:** Complete UI with all features
 
+### Current Frontend Task List (Short)
+- [x] Theme tokens with CSS variables
+- [x] Core UI primitives (Button/Card/Badge/Input/Table/Modal/Toast/Skeleton)
+- [x] Layout shell (Sidebar/Header/DashboardLayout)
+- [x] Auth screens (login/register)
+- [x] Instances page (list/create/delete)
+- [x] Workflows page + bulk actions
+- [x] Executions page + retry
+- [x] Analytics page (stats/costs/trends/anomalies)
+- [x] Audit page (admin only)
+- [x] Settings page + theme toggle settings
+
+### Frontend Completion Checklist (Detailed)
+- [x] Route guards for authenticated pages
+- [x] Admin-only guard for audit/retention
+- [x] Logout button in header
+- [x] Retention page uses dashboard layout + theme vars
+- [x] Workflow bulk selection UI (checkboxes)
+- [x] Execution detail + delete UI
+- [x] Workflow detail + update UI
+- [x] Audit filters (action/resource/limit)
+- [x] Analytics charts (visual)
+- [x] Standardized empty/loading/error states
+
+### Frontend Completion Checklist (Active)
+- [x] Route guard for authenticated pages
+- [x] Admin-only gate for audit + retention
+- [x] Logout action in header
+- [x] Integrate retention page into dashboard layout/theme
+- [x] Instance edit/update UI (modal + PUT)
+- [x] Workflow details view (GET by id)
+- [x] Execution details + delete action
+- [x] Bulk workflow selection (checkboxes)
+- [x] Analytics data mapping fixes (successRate/cost/anomalies)
+- [x] Analytics charts (real charts)
+- [x] Audit log filters + cursor pagination
+
 ### Tasks
 
-#### 5.1 UI Foundation
-- [ ] Set up Tailwind CSS configuration
-- [ ] Create design tokens (colors, spacing, typography)
-- [ ] Create `components/ui/Card.tsx`
-- [ ] Create `components/ui/Badge.tsx`
-- [ ] Create `components/ui/Button.tsx`
-- [ ] Create `components/ui/Input.tsx`
-- [ ] Create `components/ui/Table.tsx`
-- [ ] Create `components/ui/Modal.tsx`
-- [ ] Create `components/ui/Toast.tsx`
+#### 5.1 Theme Foundation (CSS Variables First)
+- [x] Define CSS variable tokens in `globals.css` (color, radius, spacing, elevation)
+  - [x] `--bg`, `--fg`, `--muted`, `--border`, `--primary`, `--primary-foreground`, `--danger`, `--warning`, `--success`
+- [x] Add light/dark theme scopes using variables (e.g., `[data-theme="light"]`, `[data-theme="dark"]`)
+- [x] Map Tailwind to CSS variables (background, text, border, ring)
+- [x] Create a simple theme switch hook (toggle `data-theme`)
 
-#### 5.2 Layout Components
-- [ ] Create `components/Sidebar.tsx` — navigation sidebar
-- [ ] Create `components/Header.tsx` — top header with user menu
-- [ ] Create `components/DashboardLayout.tsx` — main layout wrapper
+#### 5.2 UI Primitives (Variable-Driven)
+- [x] `components/ui/Button.tsx` (variants via CSS vars)
+- [x] `components/ui/Card.tsx`
+- [x] `components/ui/Badge.tsx`
+- [x] `components/ui/Input.tsx`
+- [x] `components/ui/Table.tsx`
+- [x] `components/ui/Modal.tsx`
+- [x] `components/ui/Toast.tsx`
+- [x] `components/ui/Skeleton.tsx`
 
-#### 5.3 Custom Hooks
-- [ ] Create `hooks/useWorkflows.ts` — fetch workflows with SWR
-- [ ] Create `hooks/useExecutions.ts` — fetch executions
-- [ ] Create `hooks/useAnalytics.ts` — fetch analytics data
-- [ ] Create `hooks/useInstances.ts` — fetch instances
-- [ ] Create `hooks/useAuth.ts` — authentication state
+#### 5.3 Layout & Navigation
+- [x] `components/Sidebar.tsx` (links to dashboard/workflows/executions/analytics/instances/audit/retention)
+- [x] `components/Header.tsx` (user menu, theme toggle)
+- [x] `components/DashboardLayout.tsx`
+- [x] Route guard layout for authenticated pages
 
-#### 5.4 Feature Components
-- [ ] Create `components/WorkflowTable.tsx` — workflow list with toggle
-- [ ] Create `components/ExecutionHistory.tsx` — execution timeline
-- [ ] Create `components/StatsCard.tsx` — metric display card
-- [ ] Create `components/SuccessRateChart.tsx` — Recharts success rate graph
-- [ ] Create `components/TrafficChart.tsx` — Recharts traffic graph
-- [ ] Create `components/CostBreakdown.tsx` — cost visualization
-- [ ] Create `components/InstanceCard.tsx` — instance display
-- [ ] Create `components/AuditLogTable.tsx` — audit trail display
+#### 5.4 Data Layer (Aligned to Backend)
+- [x] `hooks/useAuth.ts` → `/api/auth/me`
+- [x] `hooks/useInstances.ts` → `/api/instances`
+- [x] `hooks/useWorkflows.ts` → `/api/proxy/workflows`
+- [x] `hooks/useExecutions.ts` → `/api/proxy/executions`
+- [x] `hooks/useAnalytics.ts` → `/api/analytics/stats|costs|trends|anomalies`
+- [x] `hooks/useAuditLogs.ts` → `/api/audit-logs`
+- [x] `hooks/useRetentionPolicies.ts` → `/api/retention-policies`
+- [x] Standardize error/loading/empty states in each hook
 
-#### 5.5 Pages
-- [ ] Create `app/login/page.tsx` — login page
-- [ ] Create `app/dashboard/page.tsx` — main dashboard with stats
-- [ ] Create `app/workflows/page.tsx` — workflow management page
-- [ ] Create `app/executions/page.tsx` — execution history page
-- [ ] Create `app/analytics/page.tsx` — analytics and insights page
-- [ ] Create `app/instances/page.tsx` — instance management page
-- [ ] Create `app/settings/page.tsx` — user settings page
-- [ ] Create `app/audit/page.tsx` — audit log page (admin only)
+#### 5.5 Auth Screens
+- [x] `app/login/page.tsx` (Credentials login)
+- [x] `app/register/page.tsx` (uses `/api/auth/register`)
+- [x] Redirect unauthenticated users to login
 
-#### 5.6 State Management
-- [ ] Set up optimistic UI for workflow toggles
-- [ ] Implement loading states (skeletons)
-- [ ] Implement error states with retry
-- [ ] Add toast notifications for actions
+#### 5.6 Instance Management
+- [x] `app/instances/page.tsx` (list/create/update/delete)
+- [x] `components/InstanceCard.tsx`
+- [x] Inline health status badges + last check
 
-#### 5.7 Polish
-- [ ] Add responsive design (mobile, tablet, desktop)
-- [ ] Add dark mode support
-- [ ] Add animations and transitions
-- [ ] Add keyboard shortcuts
-- [ ] Add accessibility (ARIA labels, focus management)
+#### 5.7 Workflow Management
+- [x] `app/workflows/page.tsx` (list, activate/deactivate)
+- [x] `components/WorkflowTable.tsx`
+- [x] Bulk activate/deactivate UI wired to `/api/proxy/workflows/bulk/*`
 
-#### 5.8 Testing
-- [ ] Test all components in isolation
-- [ ] Test user flows (login → dashboard → workflow toggle)
-- [ ] Test error handling and edge cases
-- [ ] Test responsive design on different screen sizes
-- [ ] Test with different user roles
+#### 5.8 Execution Monitoring
+- [x] `app/executions/page.tsx` (filters: workflowId/status)
+- [x] `components/ExecutionHistory.tsx`
+- [x] Retry action wired to `/api/proxy/executions/[id]/retry`
+
+#### 5.9 Analytics & Insights
+- [x] `app/analytics/page.tsx`
+- [x] `components/StatsCard.tsx`
+- [x] `components/SuccessRateChart.tsx`
+- [x] `components/TrafficChart.tsx`
+- [x] `components/CostBreakdown.tsx` (unitCost input)
+- [x] Anomalies/trends panels
+  - [x] Fix successRate percent mapping
+  - [x] Fix costs response mapping
+  - [x] Render anomaly fields (expected/actual/severity)
+
+#### 5.10 Governance & Audit
+- [x] `app/audit/page.tsx` (admin-only)
+- [x] `components/AuditLogTable.tsx`
+- [x] `app/retention/page.tsx` polish (already created) + integrate with new layout
+  - [x] Add cursor pagination (before/next)
+
+#### 5.11 Settings & Profile
+- [x] `app/settings/page.tsx` (theme toggle, user info)
+- [ ] Optional: api key rotation info (read-only)
+
+#### 5.12 UX & QA
+- [ ] Optimistic UI for workflow toggles
+- [ ] Toasts for success/error
+- [ ] Responsive layout (mobile/tablet/desktop)
+- [ ] Accessibility pass (ARIA, focus, contrast)
+- [ ] Frontend tests for core flows
 
 ---
 
