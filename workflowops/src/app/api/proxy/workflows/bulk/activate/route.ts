@@ -4,8 +4,9 @@ import { auth } from "@/lib/auth";
 import { connectToDatabase } from "@/lib/db";
 import { decryptString } from "@/lib/encryption";
 import { hasRole } from "@/lib/rbac";
+import { enforceGlobalAndUserRateLimit } from "@/lib/rate-limit";
 import Instance from "@/models/Instance";
-import { activateWorkflow } from "@/services/n8n";
+import { activateWorkflow, N8nError } from "@/services/n8n";
 import { writeAuditLog } from "@/services/audit";
 
 const bulkSchema = z.object({
@@ -25,11 +26,14 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
+    const userId = (session.user as { id: string }).id;
+    const rateLimitResponse = enforceGlobalAndUserRateLimit(userId);
+    if (rateLimitResponse) return rateLimitResponse;
+
     const body = await request.json();
     const payload = bulkSchema.parse(body);
 
     await connectToDatabase();
-    const userId = (session.user as { id: string }).id;
     const instance = await Instance.findOne({ _id: payload.instanceId, userId });
     if (!instance) {
       return NextResponse.json({ error: "Instance not found" }, { status: 404 });
@@ -40,11 +44,28 @@ export async function POST(request: Request) {
       payload.workflowIds.map((id) => activateWorkflow(instance.url, apiKey, id))
     );
 
-    const response = results.map((result, index) =>
-      result.status === "fulfilled"
-        ? { workflowId: payload.workflowIds[index], status: "success" }
-        : { workflowId: payload.workflowIds[index], status: "error", error: String(result.reason) }
-    );
+    const response = results.map((result, index) => {
+      if (result.status === "fulfilled") {
+        return { workflowId: payload.workflowIds[index], status: "success" };
+      }
+
+      const reason = result.reason as unknown;
+      if (reason instanceof N8nError) {
+        return {
+          workflowId: payload.workflowIds[index],
+          status: "error",
+          error: reason.body || "Upstream error",
+          statusCode: reason.status,
+          rateLimit: reason.rateLimit,
+        };
+      }
+
+      return {
+        workflowId: payload.workflowIds[index],
+        status: "error",
+        error: String(result.reason),
+      };
+    });
 
     await writeAuditLog({
       userId,

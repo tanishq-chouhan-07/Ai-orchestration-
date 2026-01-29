@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { connectToDatabase } from "@/lib/db";
+import { enforceGlobalAndUserRateLimit } from "@/lib/rate-limit";
 import AuditLog from "@/models/AuditLog";
 import { hasRole } from "@/lib/rbac";
 
@@ -15,6 +16,10 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
+  const userId = (session.user as { id: string }).id;
+  const rateLimitResponse = enforceGlobalAndUserRateLimit(userId);
+  if (rateLimitResponse) return rateLimitResponse;
+
   const { searchParams } = new URL(request.url);
   const limitParam = searchParams.get("limit") ?? "50";
   const limit = Math.min(Number(limitParam), 200);
@@ -23,7 +28,6 @@ export async function GET(request: Request) {
   const before = searchParams.get("before") ?? undefined;
 
   await connectToDatabase();
-  const userId = (session.user as { id: string }).id;
   const query: Record<string, unknown> = { userId };
   if (action) query.action = action;
   if (resource) query.resource = resource;

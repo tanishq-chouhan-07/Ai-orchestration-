@@ -4,8 +4,9 @@ import { connectToDatabase } from "@/lib/db";
 import { decryptString } from "@/lib/encryption";
 import { redactObject } from "@/lib/redaction";
 import { hasRole } from "@/lib/rbac";
+import { enforceGlobalAndUserRateLimit } from "@/lib/rate-limit";
 import Instance from "@/models/Instance";
-import { deleteExecution, fetchExecutionById } from "@/services/n8n";
+import { deleteExecution, fetchExecutionById, N8nError } from "@/services/n8n";
 import { writeAuditLog } from "@/services/audit";
 
 type RouteContext = { params: { id: string } };
@@ -16,6 +17,15 @@ export async function GET(request: Request, context: RouteContext) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  const role = (session.user as { role?: string }).role ?? "viewer";
+  if (!hasRole(role as "viewer" | "operator" | "admin", "viewer")) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
+  const userId = (session.user as { id: string }).id;
+  const rateLimitResponse = enforceGlobalAndUserRateLimit(userId);
+  if (rateLimitResponse) return rateLimitResponse;
+
   const { searchParams } = new URL(request.url);
   const instanceId = searchParams.get("instanceId");
   if (!instanceId) {
@@ -23,16 +33,26 @@ export async function GET(request: Request, context: RouteContext) {
   }
 
   await connectToDatabase();
-  const userId = (session.user as { id: string }).id;
   const instance = await Instance.findOne({ _id: instanceId, userId });
   if (!instance) {
     return NextResponse.json({ error: "Instance not found" }, { status: 404 });
   }
 
   const apiKey = decryptString(instance.encryptedApiKey);
-  const execution = await fetchExecutionById(instance.url, apiKey, context.params.id);
-  const redacted = redactObject(execution);
-  return NextResponse.json({ data: redacted });
+
+  try {
+    const execution = await fetchExecutionById(instance.url, apiKey, context.params.id);
+    const redacted = redactObject(execution);
+    return NextResponse.json({ data: redacted });
+  } catch (error) {
+    if (error instanceof N8nError) {
+      return NextResponse.json(
+        { error: error.body || "Upstream error", status: error.status, rateLimit: error.rateLimit },
+        { status: error.status }
+      );
+    }
+    return NextResponse.json({ error: "Upstream error" }, { status: 502 });
+  }
 }
 
 export async function DELETE(request: Request, context: RouteContext) {
@@ -46,6 +66,10 @@ export async function DELETE(request: Request, context: RouteContext) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
+  const userId = (session.user as { id: string }).id;
+  const rateLimitResponse = enforceGlobalAndUserRateLimit(userId);
+  if (rateLimitResponse) return rateLimitResponse;
+
   const { searchParams } = new URL(request.url);
   const instanceId = searchParams.get("instanceId");
   if (!instanceId) {
@@ -53,19 +77,29 @@ export async function DELETE(request: Request, context: RouteContext) {
   }
 
   await connectToDatabase();
-  const userId = (session.user as { id: string }).id;
   const instance = await Instance.findOne({ _id: instanceId, userId });
   if (!instance) {
     return NextResponse.json({ error: "Instance not found" }, { status: 404 });
   }
 
   const apiKey = decryptString(instance.encryptedApiKey);
-  const result = await deleteExecution(instance.url, apiKey, context.params.id);
-  await writeAuditLog({
-    userId,
-    action: "executions.delete",
-    resource: context.params.id,
-    metadata: { instanceId },
-  });
-  return NextResponse.json({ data: result });
+
+  try {
+    const result = await deleteExecution(instance.url, apiKey, context.params.id);
+    await writeAuditLog({
+      userId,
+      action: "executions.delete",
+      resource: context.params.id,
+      metadata: { instanceId },
+    });
+    return NextResponse.json({ data: result });
+  } catch (error) {
+    if (error instanceof N8nError) {
+      return NextResponse.json(
+        { error: error.body || "Upstream error", status: error.status, rateLimit: error.rateLimit },
+        { status: error.status }
+      );
+    }
+    return NextResponse.json({ error: "Upstream error" }, { status: 502 });
+  }
 }

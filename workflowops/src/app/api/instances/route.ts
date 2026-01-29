@@ -3,7 +3,9 @@ import { z } from "zod";
 import { auth } from "@/lib/auth";
 import { connectToDatabase } from "@/lib/db";
 import { encryptString } from "@/lib/encryption";
+import { enforceGlobalAndUserRateLimit } from "@/lib/rate-limit";
 import Instance from "@/models/Instance";
+import RetentionPolicy from "@/models/RetentionPolicy";
 import { writeAuditLog } from "@/services/audit";
 
 const createInstanceSchema = z.object({
@@ -18,8 +20,11 @@ export async function GET() {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  await connectToDatabase();
   const userId = (session.user as { id: string }).id;
+  const rateLimitResponse = enforceGlobalAndUserRateLimit(userId);
+  if (rateLimitResponse) return rateLimitResponse;
+
+  await connectToDatabase();
   const instances = await Instance.find({ userId }).sort({ createdAt: -1 });
 
   await writeAuditLog({
@@ -49,17 +54,25 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const userId = (session.user as { id: string }).id;
+    const rateLimitResponse = enforceGlobalAndUserRateLimit(userId);
+    if (rateLimitResponse) return rateLimitResponse;
+
     const body = await request.json();
     const payload = createInstanceSchema.parse(body);
 
     await connectToDatabase();
-    const userId = (session.user as { id: string }).id;
 
     const instance = await Instance.create({
       userId,
       name: payload.name,
       url: payload.url,
       encryptedApiKey: encryptString(payload.apiKey),
+    });
+
+    await RetentionPolicy.create({
+      instanceId: instance._id,
+      retentionDays: 30,
     });
 
     await writeAuditLog({

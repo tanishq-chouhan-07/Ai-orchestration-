@@ -3,6 +3,7 @@ import { z } from "zod";
 import { auth } from "@/lib/auth";
 import { connectToDatabase } from "@/lib/db";
 import { hasRole } from "@/lib/rbac";
+import { enforceGlobalAndUserRateLimit } from "@/lib/rate-limit";
 import Instance from "@/models/Instance";
 import RetentionPolicy from "@/models/RetentionPolicy";
 import { writeAuditLog } from "@/services/audit";
@@ -24,13 +25,15 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
+  const userId = (session.user as { id: string }).id;
+  const rateLimitResponse = enforceGlobalAndUserRateLimit(userId);
+  if (rateLimitResponse) return rateLimitResponse;
+
   const { searchParams } = new URL(request.url);
   const instanceId = searchParams.get("instanceId") ?? undefined;
   const workflowId = searchParams.get("workflowId") ?? undefined;
 
   await connectToDatabase();
-  const userId = (session.user as { id: string }).id;
-
   const query: Record<string, unknown> = {};
   if (instanceId) {
     const instance = await Instance.findOne({ _id: instanceId, userId });
@@ -67,11 +70,14 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
+    const userId = (session.user as { id: string }).id;
+    const rateLimitResponse = enforceGlobalAndUserRateLimit(userId);
+    if (rateLimitResponse) return rateLimitResponse;
+
     const body = await request.json();
     const payload = createSchema.parse(body);
 
     await connectToDatabase();
-    const userId = (session.user as { id: string }).id;
     const instance = await Instance.findOne({ _id: payload.instanceId, userId });
     if (!instance) {
       return NextResponse.json({ error: "Instance not found" }, { status: 404 });

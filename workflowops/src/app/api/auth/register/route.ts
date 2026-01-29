@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { connectToDatabase } from "@/lib/db";
+import { enforceRateLimit, getRateLimitDefaults } from "@/lib/rate-limit";
 import User from "@/models/User";
 
 const registerSchema = z.object({
@@ -11,6 +12,10 @@ const registerSchema = z.object({
 
 export async function POST(request: Request) {
   try {
+    const { windowMs, globalLimit } = getRateLimitDefaults();
+    const rateLimitResponse = enforceRateLimit("auth:register", globalLimit, windowMs);
+    if (rateLimitResponse) return rateLimitResponse;
+
     const body = await request.json();
     const payload = registerSchema.parse(body);
 

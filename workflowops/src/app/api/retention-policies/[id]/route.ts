@@ -3,6 +3,7 @@ import { z } from "zod";
 import { auth } from "@/lib/auth";
 import { connectToDatabase } from "@/lib/db";
 import { hasRole } from "@/lib/rbac";
+import { enforceGlobalAndUserRateLimit } from "@/lib/rate-limit";
 import Instance from "@/models/Instance";
 import RetentionPolicy from "@/models/RetentionPolicy";
 import { writeAuditLog } from "@/services/audit";
@@ -24,8 +25,11 @@ export async function GET(request: Request, context: RouteContext) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  await connectToDatabase();
   const userId = (session.user as { id: string }).id;
+  const rateLimitResponse = enforceGlobalAndUserRateLimit(userId);
+  if (rateLimitResponse) return rateLimitResponse;
+
+  await connectToDatabase();
   const policy = await RetentionPolicy.findById(context.params.id);
   if (!policy) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
@@ -58,11 +62,14 @@ export async function PUT(request: Request, context: RouteContext) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
+    const userId = (session.user as { id: string }).id;
+    const rateLimitResponse = enforceGlobalAndUserRateLimit(userId);
+    if (rateLimitResponse) return rateLimitResponse;
+
     const body = await request.json();
     const payload = updateSchema.parse(body);
 
     await connectToDatabase();
-    const userId = (session.user as { id: string }).id;
     const policy = await RetentionPolicy.findById(context.params.id);
     if (!policy) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
@@ -110,8 +117,11 @@ export async function DELETE(_request: Request, context: RouteContext) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  await connectToDatabase();
   const userId = (session.user as { id: string }).id;
+  const rateLimitResponse = enforceGlobalAndUserRateLimit(userId);
+  if (rateLimitResponse) return rateLimitResponse;
+
+  await connectToDatabase();
   const policy = await RetentionPolicy.findById(context.params.id);
   if (!policy) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });

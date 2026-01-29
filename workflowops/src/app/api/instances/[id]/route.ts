@@ -3,6 +3,7 @@ import { z } from "zod";
 import { auth } from "@/lib/auth";
 import { connectToDatabase } from "@/lib/db";
 import { encryptString } from "@/lib/encryption";
+import { enforceGlobalAndUserRateLimit } from "@/lib/rate-limit";
 import Instance from "@/models/Instance";
 import { writeAuditLog } from "@/services/audit";
 
@@ -22,8 +23,11 @@ export async function GET(_request: Request, context: RouteContext) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  await connectToDatabase();
   const userId = (session.user as { id: string }).id;
+  const rateLimitResponse = enforceGlobalAndUserRateLimit(userId);
+  if (rateLimitResponse) return rateLimitResponse;
+
+  await connectToDatabase();
   const instance = await Instance.findOne({ _id: context.params.id, userId });
   if (!instance) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
@@ -54,11 +58,14 @@ export async function PUT(request: Request, context: RouteContext) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const userId = (session.user as { id: string }).id;
+    const rateLimitResponse = enforceGlobalAndUserRateLimit(userId);
+    if (rateLimitResponse) return rateLimitResponse;
+
     const body = await request.json();
     const payload = updateInstanceSchema.parse(body);
 
     await connectToDatabase();
-    const userId = (session.user as { id: string }).id;
 
     const update: Record<string, unknown> = {};
     if (payload.name) update.name = payload.name;
@@ -106,8 +113,11 @@ export async function DELETE(_request: Request, context: RouteContext) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  await connectToDatabase();
   const userId = (session.user as { id: string }).id;
+  const rateLimitResponse = enforceGlobalAndUserRateLimit(userId);
+  if (rateLimitResponse) return rateLimitResponse;
+
+  await connectToDatabase();
   const deleted = await Instance.findOneAndDelete({ _id: context.params.id, userId });
   if (!deleted) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });

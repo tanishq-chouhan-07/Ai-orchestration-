@@ -3,6 +3,19 @@ type N8nRequestOptions = {
   body?: unknown;
 };
 
+export class N8nError extends Error {
+  status: number;
+  body: string;
+  rateLimit?: { retryAfter?: string };
+
+  constructor(status: number, body: string, rateLimit?: { retryAfter?: string }) {
+    super(`n8n request failed: ${status}`);
+    this.status = status;
+    this.body = body;
+    this.rateLimit = rateLimit;
+  }
+}
+
 function buildBaseUrl(instanceUrl: string) {
   const normalized = instanceUrl.replace(/\/+$/, "");
   return normalized.endsWith("/api/v1") ? normalized : `${normalized}/api/v1`;
@@ -26,7 +39,9 @@ async function n8nRequest<T>(
 
   if (!response.ok) {
     const text = await response.text();
-    throw new Error(`n8n request failed: ${response.status} ${text}`);
+    const retryAfter = response.headers.get("retry-after") ?? undefined;
+    const rateLimit = response.status === 429 ? { retryAfter } : undefined;
+    throw new N8nError(response.status, text, rateLimit);
   }
 
   return (await response.json()) as T;
