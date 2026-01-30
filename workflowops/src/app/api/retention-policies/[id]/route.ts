@@ -12,9 +12,10 @@ const updateSchema = z.object({
   retentionDays: z.number().int().min(1).max(365),
 });
 
-type RouteContext = { params: { id: string } };
+type RouteContext = { params: Promise<{ id: string }> };
 
 export async function GET(request: Request, context: RouteContext) {
+  const { id } = await context.params;
   const session = await auth();
   if (!session?.user || !(session.user as { id?: string; role?: string }).id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -30,7 +31,7 @@ export async function GET(request: Request, context: RouteContext) {
   if (rateLimitResponse) return rateLimitResponse;
 
   await connectToDatabase();
-  const policy = await RetentionPolicy.findById(context.params.id);
+  const policy = await RetentionPolicy.findById(id);
   if (!policy) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
@@ -51,6 +52,7 @@ export async function GET(request: Request, context: RouteContext) {
 }
 
 export async function PUT(request: Request, context: RouteContext) {
+  const { id } = await context.params;
   try {
     const session = await auth();
     if (!session?.user || !(session.user as { id?: string; role?: string }).id) {
@@ -70,7 +72,7 @@ export async function PUT(request: Request, context: RouteContext) {
     const payload = updateSchema.parse(body);
 
     await connectToDatabase();
-    const policy = await RetentionPolicy.findById(context.params.id);
+    const policy = await RetentionPolicy.findById(id);
     if (!policy) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
@@ -107,6 +109,7 @@ export async function PUT(request: Request, context: RouteContext) {
 }
 
 export async function DELETE(_request: Request, context: RouteContext) {
+  const { id } = await context.params;
   const session = await auth();
   if (!session?.user || !(session.user as { id?: string; role?: string }).id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -122,7 +125,7 @@ export async function DELETE(_request: Request, context: RouteContext) {
   if (rateLimitResponse) return rateLimitResponse;
 
   await connectToDatabase();
-  const policy = await RetentionPolicy.findById(context.params.id);
+  const policy = await RetentionPolicy.findById(id);
   if (!policy) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }

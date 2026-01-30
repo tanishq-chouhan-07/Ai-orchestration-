@@ -8,6 +8,8 @@ import Instance from "@/models/Instance";
 import { fetchExecutions, N8nError } from "@/services/n8n";
 import { getTrends } from "@/services/analytics";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(request: Request) {
   const session = await auth();
   if (!session?.user || !(session.user as { id?: string; role?: string }).id) {

@@ -14,7 +14,7 @@ const updateInstanceSchema = z.object({
 });
 
 type RouteContext = {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 };
 
 export async function GET(_request: Request, context: RouteContext) {
@@ -27,8 +27,9 @@ export async function GET(_request: Request, context: RouteContext) {
   const rateLimitResponse = enforceGlobalAndUserRateLimit(userId);
   if (rateLimitResponse) return rateLimitResponse;
 
+  const { id } = await context.params;
   await connectToDatabase();
-  const instance = await Instance.findOne({ _id: context.params.id, userId });
+  const instance = await Instance.findOne({ _id: id, userId });
   if (!instance) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
@@ -65,6 +66,7 @@ export async function PUT(request: Request, context: RouteContext) {
     const body = await request.json();
     const payload = updateInstanceSchema.parse(body);
 
+    const { id } = await context.params;
     await connectToDatabase();
 
     const update: Record<string, unknown> = {};
@@ -73,7 +75,7 @@ export async function PUT(request: Request, context: RouteContext) {
     if (payload.apiKey) update.encryptedApiKey = encryptString(payload.apiKey);
 
     const instance = await Instance.findOneAndUpdate(
-      { _id: context.params.id, userId },
+      { _id: id, userId },
       update,
       { new: true }
     );
@@ -117,8 +119,9 @@ export async function DELETE(_request: Request, context: RouteContext) {
   const rateLimitResponse = enforceGlobalAndUserRateLimit(userId);
   if (rateLimitResponse) return rateLimitResponse;
 
+  const { id } = await context.params;
   await connectToDatabase();
-  const deleted = await Instance.findOneAndDelete({ _id: context.params.id, userId });
+  const deleted = await Instance.findOneAndDelete({ _id: id, userId });
   if (!deleted) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }

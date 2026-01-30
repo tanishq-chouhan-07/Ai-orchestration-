@@ -44,6 +44,17 @@ Open http://localhost:3000
 - npm run lint
 - npm test
 
+## Connect an n8n instance
+1. Run n8n (local, self-hosted, or cloud) and ensure it is reachable from this app.
+2. Create an n8n API key in n8n (Settings → API/Personal Access Tokens).
+3. In WorkflowOps, go to Instances → Add instance.
+4. Use the base URL only (e.g., http://localhost:5678 or https://your-n8n-domain). Do not include /api/v1.
+5. Paste the API key and save.
+
+Notes:
+- Cloud/self-hosted instances must allow outbound access from the WorkflowOps server.
+- If you use a reverse proxy, ensure /api/v1 is exposed.
+
 ## Background jobs
 Scheduler runs automatically in Node runtime via instrumentation:
 - Health check (every 15 minutes)

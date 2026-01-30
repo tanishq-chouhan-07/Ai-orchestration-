@@ -7,9 +7,10 @@ import { enforceGlobalAndUserRateLimit } from "@/lib/rate-limit";
 import Instance from "@/models/Instance";
 import { fetchWorkflowById, updateWorkflow, N8nError } from "@/services/n8n";
 
-type RouteContext = { params: { id: string } };
+type RouteContext = { params: Promise<{ id: string }> };
 
 export async function GET(request: Request, context: RouteContext) {
+  const { id } = await context.params;
   const session = await auth();
   if (!session?.user || !(session.user as { id?: string; role?: string }).id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -39,7 +40,7 @@ export async function GET(request: Request, context: RouteContext) {
   const apiKey = decryptString(instance.encryptedApiKey);
 
   try {
-    const workflow = await fetchWorkflowById(instance.url, apiKey, context.params.id);
+    const workflow = await fetchWorkflowById(instance.url, apiKey, id);
     return NextResponse.json({ data: workflow });
   } catch (error) {
     if (error instanceof N8nError) {
@@ -53,6 +54,7 @@ export async function GET(request: Request, context: RouteContext) {
 }
 
 export async function PUT(request: Request, context: RouteContext) {
+  const { id } = await context.params;
   const session = await auth();
   if (!session?.user || !(session.user as { id?: string; role?: string }).id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -84,7 +86,7 @@ export async function PUT(request: Request, context: RouteContext) {
   const apiKey = decryptString(instance.encryptedApiKey);
 
   try {
-    const updated = await updateWorkflow(instance.url, apiKey, context.params.id, payload);
+    const updated = await updateWorkflow(instance.url, apiKey, id, payload);
     return NextResponse.json({ data: updated });
   } catch (error) {
     if (error instanceof N8nError) {

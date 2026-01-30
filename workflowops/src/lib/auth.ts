@@ -14,10 +14,13 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 			},
 			async authorize(credentials) {
 				if (!credentials?.email || !credentials.password) return null;
+				const email = credentials.email as string;
+				const password = credentials.password as string;
+
 				await connectToDatabase();
-				const user = await User.findOne({ email: credentials.email.toLowerCase() });
+				const user = await User.findOne({ email: email.toLowerCase() });
 				if (!user) return null;
-				const isValid = await user.comparePassword(credentials.password);
+				const isValid = await user.comparePassword(password);
 				if (!isValid) return null;
 				return {
 					id: user._id.toString(),

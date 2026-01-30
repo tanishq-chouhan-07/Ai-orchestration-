@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+
+export const runtime = "nodejs";
 import { auth } from "@/lib/auth";
 import { connectToDatabase } from "@/lib/db";
 import { decryptString } from "@/lib/encryption";

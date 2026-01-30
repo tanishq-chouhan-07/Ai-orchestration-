@@ -8,9 +8,10 @@ import Instance from "@/models/Instance";
 import { activateWorkflow, N8nError } from "@/services/n8n";
 import { writeAuditLog } from "@/services/audit";
 
-type RouteContext = { params: { id: string } };
+type RouteContext = { params: Promise<{ id: string }> };
 
 export async function POST(request: Request, context: RouteContext) {
+  const { id } = await context.params;
   const session = await auth();
   if (!session?.user || !(session.user as { id?: string; role?: string }).id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -39,11 +40,11 @@ export async function POST(request: Request, context: RouteContext) {
 
   const apiKey = decryptString(instance.encryptedApiKey);
   try {
-    const result = await activateWorkflow(instance.url, apiKey, context.params.id);
+    const result = await activateWorkflow(instance.url, apiKey, id);
     await writeAuditLog({
       userId,
       action: "workflows.activate",
-      resource: context.params.id,
+      resource: id,
       metadata: { instanceId },
     });
     return NextResponse.json({ data: result });

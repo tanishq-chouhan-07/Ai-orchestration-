@@ -1,7 +1,8 @@
-import { startScheduler } from "@/jobs/scheduler";
+export const runtime = "nodejs";
 
-export function register() {
+export async function register() {
   if (process.env.NEXT_RUNTIME === "nodejs") {
+    const { startScheduler } = await import("@/jobs/scheduler");
     startScheduler();
   }
 }

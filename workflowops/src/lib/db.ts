@@ -1,12 +1,6 @@
 import mongoose from "mongoose";
 import { logger } from "@/lib/logger";
 
-const MONGODB_URI : string = process.env.MONGODB_URI!;
-
-if (!MONGODB_URI) {
-  throw new Error("Missing MONGODB_URI");
-}
-
 let cached = (global as unknown as { mongoose?: { conn: typeof mongoose | null; promise: Promise<typeof mongoose> | null } }).mongoose;
 let listenersAttached = (global as unknown as { mongooseListenersAttached?: boolean }).mongooseListenersAttached;
 
@@ -17,6 +11,12 @@ if (!cached) {
 
 export async function connectToDatabase() {
   if (cached!.conn) return cached!.conn;
+
+  const MONGODB_URI = process.env.MONGODB_URI;
+  if (!MONGODB_URI) {
+    throw new Error("Missing MONGODB_URI");
+  }
+
   if (!cached!.promise) {
     if (!listenersAttached) {
       mongoose.connection.on("connected", () => logger.info("MongoDB connected"));

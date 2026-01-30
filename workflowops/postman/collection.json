@@ -1,0 +1,492 @@
+{
+  "info": {
+    "name": "WorkflowOps API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "{{baseUrl}}" }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/api/auth/register", "host": ["{{baseUrl}}"], "path": ["api", "auth", "register"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"{{name}}\",\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/x-www-form-urlencoded" }],
+            "url": { "raw": "{{baseUrl}}/api/auth/callback/credentials", "host": ["{{baseUrl}}"], "path": ["api", "auth", "callback", "credentials"] },
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                { "key": "email", "value": "{{email}}" },
+                { "key": "password", "value": "{{password}}" },
+                { "key": "redirect", "value": "false" },
+                { "key": "callbackUrl", "value": "/dashboard" }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Login response', function () {",
+                  "  pm.expect([200, 302]).to.include(pm.response.code);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Me",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/auth/me", "host": ["{{baseUrl}}"], "path": ["api", "auth", "me"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Instances",
+      "item": [
+        {
+          "name": "Create",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/api/instances", "host": ["{{baseUrl}}"], "path": ["api", "instances"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"{{instanceName}}\",\n  \"url\": \"{{instanceUrl}}\",\n  \"apiKey\": \"{{instanceApiKey}}\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "  const json = pm.response.json();",
+                  "  if (json?.id) pm.environment.set('instanceId', json.id);",
+                  "}",
+                  "pm.test('Create instance', function () {",
+                  "  pm.expect([200, 201]).to.include(pm.response.code);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "List",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/instances", "host": ["{{baseUrl}}"], "path": ["api", "instances"] }
+          }
+        },
+        {
+          "name": "Get By Id",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/instances/{{instanceId}}", "host": ["{{baseUrl}}"], "path": ["api", "instances", "{{instanceId}}"] }
+          }
+        },
+        {
+          "name": "Update",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/api/instances/{{instanceId}}", "host": ["{{baseUrl}}"], "path": ["api", "instances", "{{instanceId}}"] },
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"{{instanceName}} Updated\"\n}" }
+          }
+        },
+        {
+          "name": "Delete",
+          "request": {
+            "method": "DELETE",
+            "url": { "raw": "{{baseUrl}}/api/instances/{{instanceId}}", "host": ["{{baseUrl}}"], "path": ["api", "instances", "{{instanceId}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Workflows",
+      "item": [
+        {
+          "name": "List",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/proxy/workflows?instanceId={{instanceId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "proxy", "workflows"],
+              "query": [{ "key": "instanceId", "value": "{{instanceId}}" }]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "  const json = pm.response.json();",
+                  "  const first = json?.data?.[0];",
+                  "  if (first?.id) pm.environment.set('workflowId', first.id);",
+                  "}",
+                  "pm.test('List workflows', function () {",
+                  "  pm.expect([200, 404]).to.include(pm.response.code);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get By Id",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/proxy/workflows/{{workflowId}}?instanceId={{instanceId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "proxy", "workflows", "{{workflowId}}"],
+              "query": [{ "key": "instanceId", "value": "{{instanceId}}" }]
+            }
+          }
+        },
+        {
+          "name": "Activate",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/proxy/workflows/{{workflowId}}/activate?instanceId={{instanceId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "proxy", "workflows", "{{workflowId}}", "activate"],
+              "query": [{ "key": "instanceId", "value": "{{instanceId}}" }]
+            }
+          }
+        },
+        {
+          "name": "Deactivate",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/proxy/workflows/{{workflowId}}/deactivate?instanceId={{instanceId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "proxy", "workflows", "{{workflowId}}", "deactivate"],
+              "query": [{ "key": "instanceId", "value": "{{instanceId}}" }]
+            }
+          }
+        },
+        {
+          "name": "Bulk Activate",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/api/proxy/workflows/bulk/activate", "host": ["{{baseUrl}}"], "path": ["api", "proxy", "workflows", "bulk", "activate"] },
+            "body": { "mode": "raw", "raw": "{\n  \"instanceId\": \"{{instanceId}}\",\n  \"workflowIds\": [\"{{workflowId}}\"]\n}" }
+          }
+        },
+        {
+          "name": "Bulk Deactivate",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/api/proxy/workflows/bulk/deactivate", "host": ["{{baseUrl}}"], "path": ["api", "proxy", "workflows", "bulk", "deactivate"] },
+            "body": { "mode": "raw", "raw": "{\n  \"instanceId\": \"{{instanceId}}\",\n  \"workflowIds\": [\"{{workflowId}}\"]\n}" }
+          }
+        },
+        {
+          "name": "Update",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/proxy/workflows/{{workflowId}}?instanceId={{instanceId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "proxy", "workflows", "{{workflowId}}"],
+              "query": [{ "key": "instanceId", "value": "{{instanceId}}" }]
+            },
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"WorkflowOps Test\"\n}" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Executions",
+      "item": [
+        {
+          "name": "List",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/proxy/executions?instanceId={{instanceId}}&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "proxy", "executions"],
+              "query": [
+                { "key": "instanceId", "value": "{{instanceId}}" },
+                { "key": "limit", "value": "10" }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "  const json = pm.response.json();",
+                  "  const first = json?.data?.[0];",
+                  "  if (first?.id) pm.environment.set('executionId', first.id);",
+                  "}",
+                  "pm.test('List executions', function () {",
+                  "  pm.expect([200, 404]).to.include(pm.response.code);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get By Id",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/proxy/executions/{{executionId}}?instanceId={{instanceId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "proxy", "executions", "{{executionId}}"],
+              "query": [{ "key": "instanceId", "value": "{{instanceId}}" }]
+            }
+          }
+        },
+        {
+          "name": "Retry",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/proxy/executions/{{executionId}}/retry?instanceId={{instanceId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "proxy", "executions", "{{executionId}}", "retry"],
+              "query": [{ "key": "instanceId", "value": "{{instanceId}}" }]
+            }
+          }
+        },
+        {
+          "name": "Delete",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrl}}/api/proxy/executions/{{executionId}}?instanceId={{instanceId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "proxy", "executions", "{{executionId}}"],
+              "query": [{ "key": "instanceId", "value": "{{instanceId}}" }]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Analytics",
+      "item": [
+        {
+          "name": "Stats",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/analytics/stats?instanceId={{instanceId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "analytics", "stats"],
+              "query": [{ "key": "instanceId", "value": "{{instanceId}}" }]
+            }
+          }
+        },
+        {
+          "name": "Costs",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/analytics/costs?instanceId={{instanceId}}&unitCost={{unitCost}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "analytics", "costs"],
+              "query": [
+                { "key": "instanceId", "value": "{{instanceId}}" },
+                { "key": "unitCost", "value": "{{unitCost}}" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Trends",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/analytics/trends?instanceId={{instanceId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "analytics", "trends"],
+              "query": [{ "key": "instanceId", "value": "{{instanceId}}" }]
+            }
+          }
+        },
+        {
+          "name": "Anomalies",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/analytics/anomalies?instanceId={{instanceId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "analytics", "anomalies"],
+              "query": [{ "key": "instanceId", "value": "{{instanceId}}" }]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Audit",
+      "item": [
+        {
+          "name": "List",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/audit-logs?limit=50",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "audit-logs"],
+              "query": [{ "key": "limit", "value": "50" }]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "  const json = pm.response.json();",
+                  "  if (json?.nextCursor) pm.environment.set('auditBefore', json.nextCursor);",
+                  "}",
+                  "pm.test('List audit logs', function () {",
+                  "  pm.expect([200, 403]).to.include(pm.response.code);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "List (Before Cursor)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/audit-logs?limit=50&before={{auditBefore}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "audit-logs"],
+              "query": [
+                { "key": "limit", "value": "50" },
+                { "key": "before", "value": "{{auditBefore}}" }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Retention Policies",
+      "item": [
+        {
+          "name": "List",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/retention-policies", "host": ["{{baseUrl}}"], "path": ["api", "retention-policies"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "  const json = pm.response.json();",
+                  "  const first = json?.data?.[0];",
+                  "  if (first?.id) pm.environment.set('retentionPolicyId', first.id);",
+                  "}",
+                  "pm.test('List retention policies', function () {",
+                  "  pm.expect([200, 403]).to.include(pm.response.code);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/api/retention-policies", "host": ["{{baseUrl}}"], "path": ["api", "retention-policies"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"instanceId\": \"{{instanceId}}\",\n  \"retentionDays\": 14\n}"
+            }
+          }
+        },
+        {
+          "name": "Update",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/api/retention-policies/{{retentionPolicyId}}", "host": ["{{baseUrl}}"], "path": ["api", "retention-policies", "{{retentionPolicyId}}"] },
+            "body": { "mode": "raw", "raw": "{\n  \"retentionDays\": 21\n}" }
+          }
+        },
+        {
+          "name": "Delete",
+          "request": {
+            "method": "DELETE",
+            "url": { "raw": "{{baseUrl}}/api/retention-policies/{{retentionPolicyId}}", "host": ["{{baseUrl}}"], "path": ["api", "retention-policies", "{{retentionPolicyId}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "System",
+      "item": [
+        {
+          "name": "Health",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/system/health", "host": ["{{baseUrl}}"], "path": ["api", "system", "health"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Webhooks",
+      "item": [
+        {
+          "name": "n8n Webhook",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "x-n8n-signature", "value": "{{webhookSignature}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/webhooks/n8n", "host": ["{{baseUrl}}"], "path": ["api", "webhooks", "n8n"] },
+            "body": { "mode": "raw", "raw": "{\n  \"event\": \"test\",\n  \"payload\": {\n    \"id\": \"evt_123\",\n    \"status\": \"ok\"\n  }\n}" }
+          }
+        }
+      ]
+    }
+  ]
+}

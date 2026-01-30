@@ -9,9 +9,10 @@ import Instance from "@/models/Instance";
 import { deleteExecution, fetchExecutionById, N8nError } from "@/services/n8n";
 import { writeAuditLog } from "@/services/audit";
 
-type RouteContext = { params: { id: string } };
+type RouteContext = { params: Promise<{ id: string }> };
 
 export async function GET(request: Request, context: RouteContext) {
+  const { id } = await context.params;
   const session = await auth();
   if (!session?.user || !(session.user as { id?: string; role?: string }).id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -41,7 +42,7 @@ export async function GET(request: Request, context: RouteContext) {
   const apiKey = decryptString(instance.encryptedApiKey);
 
   try {
-    const execution = await fetchExecutionById(instance.url, apiKey, context.params.id);
+    const execution = await fetchExecutionById(instance.url, apiKey, id);
     const redacted = redactObject(execution);
     return NextResponse.json({ data: redacted });
   } catch (error) {
@@ -56,6 +57,7 @@ export async function GET(request: Request, context: RouteContext) {
 }
 
 export async function DELETE(request: Request, context: RouteContext) {
+  const { id } = await context.params;
   const session = await auth();
   if (!session?.user || !(session.user as { id?: string; role?: string }).id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -85,11 +87,11 @@ export async function DELETE(request: Request, context: RouteContext) {
   const apiKey = decryptString(instance.encryptedApiKey);
 
   try {
-    const result = await deleteExecution(instance.url, apiKey, context.params.id);
+    const result = await deleteExecution(instance.url, apiKey, id);
     await writeAuditLog({
       userId,
       action: "executions.delete",
-      resource: context.params.id,
+      resource: id,
       metadata: { instanceId },
     });
     return NextResponse.json({ data: result });

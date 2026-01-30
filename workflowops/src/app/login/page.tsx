@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { signIn } from "next-auth/react";
 import { Card } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
@@ -20,23 +21,19 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      const response = await fetch("/api/auth/callback/credentials", {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: new URLSearchParams({
-          email,
-          password,
-          redirect: "false",
-          callbackUrl: "/dashboard",
-        }),
+      const result = await signIn("credentials", {
+        email,
+        password,
+        redirect: false,
       });
 
-      if (!response.ok) {
+      if (result?.error) {
         setError("Invalid credentials.");
         return;
       }
 
       router.push("/dashboard");
+      router.refresh();
     } catch (err) {
       setError("Login failed. Try again.");
     } finally {
