@@ -1,66 +1,102 @@
-import Image from "next/image";
-
 export default function Home() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div className="min-h-screen bg-background text-foreground">
+      <header className="mx-auto flex w-full max-w-6xl items-center justify-between px-8 py-6">
+        <div>
+          <p className="text-xs uppercase text-muted">WorkflowOps</p>
+          <h1 className="text-lg font-semibold tracking-tight">Operations Console</h1>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
+        <nav className="flex items-center gap-2">
           <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="/dashboard"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="WorkflowOps"
-              width={16}
-              height={16}
-            />
-            Open Dashboard
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
+            className="rounded-[var(--radius)] border border-border px-4 py-2 text-sm text-muted transition hover:bg-background/60 hover:text-foreground"
             href="/login"
           >
             Sign in
           </a>
           <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-emerald-400/30 px-5 text-emerald-200 transition-colors hover:border-emerald-400 hover:bg-emerald-500/10 md:w-[180px]"
+            className="rounded-[var(--radius)] bg-primary px-4 py-2 text-sm text-primary-foreground transition hover:opacity-90"
             href="/register"
           >
             Create account
           </a>
-        </div>
+        </nav>
+      </header>
+
+      <main className="mx-auto w-full max-w-6xl px-8 pb-16 pt-10">
+        <section className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr]">
+          <div className="space-y-6">
+            <p className="text-xs uppercase text-muted">Minimalist Precision</p>
+            <h2 className="text-4xl font-semibold tracking-tight sm:text-5xl">
+              Monitor, govern, and scale your workflow infrastructure.
+            </h2>
+            <p className="text-base text-muted sm:text-lg">
+              WorkflowOps centralizes analytics, audit trails, execution health, and retention
+              governance across all n8n instances.
+            </p>
+            <div className="flex flex-wrap gap-3">
+              <a
+                className="rounded-[var(--radius)] bg-primary px-5 py-2.5 text-sm text-primary-foreground transition hover:opacity-90"
+                href="/dashboard"
+              >
+                Open dashboard
+              </a>
+              <a
+                className="rounded-[var(--radius)] border border-border px-5 py-2.5 text-sm text-foreground transition hover:bg-background/60"
+                href="/login"
+              >
+                Sign in
+              </a>
+            </div>
+          </div>
+          <div className="glass-panel rounded-[var(--radius)] p-6 shadow-[var(--shadow)]">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <span className="text-xs uppercase text-muted">Live overview</span>
+                <span className="rounded-full border border-border px-3 py-1 text-xs text-muted">Beta</span>
+              </div>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="rounded-[var(--radius)] border border-border bg-card p-4">
+                  <p className="text-xs text-muted">Active workflows</p>
+                  <p className="mt-2 text-2xl font-semibold">128</p>
+                </div>
+                <div className="rounded-[var(--radius)] border border-border bg-card p-4">
+                  <p className="text-xs text-muted">Success rate</p>
+                  <p className="mt-2 text-2xl font-semibold">98.2%</p>
+                </div>
+                <div className="rounded-[var(--radius)] border border-border bg-card p-4">
+                  <p className="text-xs text-muted">Audit events</p>
+                  <p className="mt-2 text-2xl font-semibold">3,482</p>
+                </div>
+                <div className="rounded-[var(--radius)] border border-border bg-card p-4">
+                  <p className="text-xs text-muted">Retention policies</p>
+                  <p className="mt-2 text-2xl font-semibold">24</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="mt-16 grid gap-4 md:grid-cols-3">
+          {[
+            {
+              title: "Analytics at a glance",
+              description: "Traffic, success rates, and cost breakdowns in one view.",
+            },
+            {
+              title: "Governed access",
+              description: "Admin-only audit logs and retention policy controls.",
+            },
+            {
+              title: "Operational control",
+              description: "Manage instances, workflows, and executions in minutes.",
+            },
+          ].map((item) => (
+            <div key={item.title} className="rounded-[var(--radius)] border border-border bg-card p-5">
+              <h3 className="text-sm font-semibold tracking-tight">{item.title}</h3>
+              <p className="mt-2 text-sm text-muted">{item.description}</p>
+            </div>
+          ))}
+        </section>
       </main>
     </div>
   );

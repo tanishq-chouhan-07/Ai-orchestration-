@@ -9,7 +9,7 @@ export default function DashboardLayout({ children }: PropsWithChildren) {
       <Sidebar />
       <div className="flex flex-1 flex-col">
         <Header />
-        <main className="flex-1 px-6 py-8">
+        <main className="flex-1 px-8 py-8">
           <AuthGuard>{children}</AuthGuard>
         </main>
       </div>

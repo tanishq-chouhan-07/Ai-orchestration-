@@ -135,7 +135,7 @@ export default function WorkflowsPage() {
   return (
     <DashboardLayout>
       <div className="space-y-6">
-        <Card>
+        <Card className="fade-up stagger-1">
           <h2 className="text-lg font-semibold">Select instance</h2>
           <div className="mt-4 flex flex-wrap gap-3">
             <select
@@ -170,23 +170,46 @@ export default function WorkflowsPage() {
         {error && <ErrorState message={error} />}
 
         {!hasInstance ? (
-          <EmptyState title="Select an instance" description="Choose an instance to view workflows." />
+          <EmptyState
+            title="Select an instance"
+            description="Choose an instance to view workflows."
+            action={
+              <Button
+                variant="secondary"
+                onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+              >
+                Choose instance
+              </Button>
+            }
+          />
         ) : loading ? (
           <div className="space-y-3">
             {[1, 2, 3].map((item) => (
               <Skeleton key={item} className="h-12" />
             ))}
           </div>
-        ) : (
-          <WorkflowTable
-            workflows={data}
-            onToggle={toggleWorkflow}
-            selectedIds={selectedIds}
-            onSelect={toggleSelect}
-            onSelectAll={toggleSelectAll}
-            onEdit={openEdit}
-            onView={viewWorkflow}
+        ) : data.length === 0 ? (
+          <EmptyState
+            title="No workflows found"
+            description="Try refreshing or select a different instance."
+            action={
+              <Button variant="secondary" onClick={() => reload()} disabled={busy}>
+                Refresh
+              </Button>
+            }
           />
+        ) : (
+          <div className="fade-up stagger-2">
+            <WorkflowTable
+              workflows={data}
+              onToggle={toggleWorkflow}
+              selectedIds={selectedIds}
+              onSelect={toggleSelect}
+              onSelectAll={toggleSelectAll}
+              onEdit={openEdit}
+              onView={viewWorkflow}
+            />
+          </div>
         )}
       </div>
       <Modal

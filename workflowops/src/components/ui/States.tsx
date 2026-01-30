@@ -20,7 +20,10 @@ type LoadingStateProps = {
 
 export function EmptyState({ title, description, action }: EmptyStateProps) {
   return (
-    <Card>
+    <Card className="flex flex-col items-center text-center">
+      <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full border border-border bg-background/60">
+        <div className="h-5 w-5 rounded-md border border-border bg-card" />
+      </div>
       <h3 className="text-sm font-semibold">{title}</h3>
       {description && <p className="mt-2 text-sm text-muted">{description}</p>}
       {action && <div className="mt-4">{action}</div>}
@@ -30,7 +33,7 @@ export function EmptyState({ title, description, action }: EmptyStateProps) {
 
 export function ErrorState({ message, action }: ErrorStateProps) {
   return (
-    <Card>
+    <Card className="flex flex-col items-center text-center">
       <h3 className="text-sm font-semibold text-danger">Something went wrong</h3>
       <p className="mt-2 text-sm text-danger">{message}</p>
       {action && <div className="mt-4">{action}</div>}

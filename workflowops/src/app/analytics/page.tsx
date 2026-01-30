@@ -57,7 +57,7 @@ export default function AnalyticsPage() {
   return (
     <DashboardLayout>
       <div className="space-y-6">
-        <Card>
+        <Card className="fade-up stagger-1">
           <h2 className="text-lg font-semibold">Analytics filters</h2>
           <div className="mt-4 grid gap-4 md:grid-cols-4">
             <select
@@ -104,10 +104,11 @@ export default function AnalyticsPage() {
           </div>
         ) : (
           <div className="grid gap-4 md:grid-cols-4">
-            <StatsCard label="Total" value={statsData?.total ?? 0} />
-            <StatsCard label="Success" value={statsData?.success ?? 0} />
-            <StatsCard label="Errors" value={statsData?.error ?? 0} />
+            <StatsCard className="fade-up stagger-2" label="Total" value={statsData?.total ?? 0} />
+            <StatsCard className="fade-up stagger-3" label="Success" value={statsData?.success ?? 0} />
+            <StatsCard className="fade-up stagger-4" label="Errors" value={statsData?.error ?? 0} />
             <StatsCard
+              className="fade-up"
               label="Success rate"
               value={`${Math.round(statsData?.successRate ?? 0)}%`}
             />
@@ -118,18 +119,29 @@ export default function AnalyticsPage() {
           {costs.loading ? (
             <Skeleton className="h-40" />
           ) : (
-            <CostBreakdown total={(costData as { cost?: number } | null)?.cost ?? 0} unitCost={unitCost} />
+            <CostBreakdown
+              className="fade-up stagger-2"
+              total={(costData as { cost?: number } | null)?.cost ?? 0}
+              unitCost={unitCost}
+            />
           )}
-          {trends.loading ? <Skeleton className="h-40" /> : <TrafficChart points={trendPoints} />}
+          {trends.loading ? (
+            <Skeleton className="h-40" />
+          ) : (
+            <TrafficChart className="fade-up stagger-3" points={trendPoints} />
+          )}
         </div>
 
         {trends.loading ? (
           <Skeleton className="h-40" />
         ) : (
-          <SuccessRateChart points={trendPoints.map((point) => ({ date: point.date, successRate: point.successRate }))} />
+          <SuccessRateChart
+            className="fade-up stagger-4"
+            points={trendPoints.map((point) => ({ date: point.date, successRate: point.successRate }))}
+          />
         )}
 
-        <Card>
+        <Card className="fade-up stagger-2">
           <h3 className="text-sm font-semibold">Anomalies</h3>
           <div className="mt-3 space-y-2 text-sm text-muted">
             {anomaliesList.length === 0 && <p>No anomalies detected.</p>}

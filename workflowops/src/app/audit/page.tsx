@@ -39,58 +39,74 @@ export default function AuditPage() {
     <DashboardLayout>
       <RoleGate role="admin">
         <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-lg font-semibold">Audit log</h2>
-            <p className="text-sm text-muted">Admin-only events.</p>
+          <div className="flex items-center justify-between fade-up stagger-1">
+            <div>
+              <h2 className="text-lg font-semibold">Audit log</h2>
+              <p className="text-sm text-muted">Admin-only events.</p>
+            </div>
+            <Button
+              variant="secondary"
+              onClick={() => {
+                setBefore(null);
+                setAppend(false);
+                reload();
+              }}
+              disabled={loading}
+            >
+              Refresh
+            </Button>
           </div>
-          <Button
-            variant="secondary"
-            onClick={() => {
-              setBefore(null);
-              setAppend(false);
-              reload();
-            }}
-            disabled={loading}
-          >
-            Refresh
-          </Button>
-        </div>
 
-        <Card>
-          <h3 className="text-sm font-semibold">Filters</h3>
-          <div className="mt-3 grid gap-3 md:grid-cols-3">
-            <input
-              className="h-10 rounded-[var(--radius)] border border-border bg-background px-3 text-sm"
-              placeholder="Action"
-              value={action}
-              onChange={(event) => setAction(event.target.value)}
-            />
-            <input
-              className="h-10 rounded-[var(--radius)] border border-border bg-background px-3 text-sm"
-              placeholder="Resource"
-              value={resource}
-              onChange={(event) => setResource(event.target.value)}
-            />
-            <input
-              className="h-10 rounded-[var(--radius)] border border-border bg-background px-3 text-sm"
-              type="number"
-              min={10}
-              max={200}
-              value={limit}
-              onChange={(event) => setLimit(Number(event.target.value))}
-            />
-          </div>
-        </Card>
+          <Card className="fade-up stagger-2">
+            <h3 className="text-sm font-semibold">Filters</h3>
+            <div className="mt-3 grid gap-3 md:grid-cols-3">
+              <input
+                className="h-10 rounded-[var(--radius)] border border-border bg-background px-3 text-sm"
+                placeholder="Action"
+                value={action}
+                onChange={(event) => setAction(event.target.value)}
+              />
+              <input
+                className="h-10 rounded-[var(--radius)] border border-border bg-background px-3 text-sm"
+                placeholder="Resource"
+                value={resource}
+                onChange={(event) => setResource(event.target.value)}
+              />
+              <input
+                className="h-10 rounded-[var(--radius)] border border-border bg-background px-3 text-sm"
+                type="number"
+                min={10}
+                max={200}
+                value={limit}
+                onChange={(event) => setLimit(Number(event.target.value))}
+              />
+            </div>
+          </Card>
 
         {error && <ErrorState message={error} />}
 
         {loading ? (
           <Skeleton className="h-32" />
         ) : data.length === 0 ? (
-          <EmptyState title="No audit entries yet" description="Audit logs will appear here." />
+          <EmptyState
+            title="No audit entries yet"
+            description="Audit logs will appear here."
+            action={
+              <Button
+                variant="secondary"
+                onClick={() => {
+                  setBefore(null);
+                  setAppend(false);
+                  reload();
+                }}
+                disabled={loading}
+              >
+                Refresh
+              </Button>
+            }
+          />
         ) : (
-          <div className="space-y-3">
+          <div className="space-y-3 fade-up stagger-3">
             <AuditLogTable logs={data} />
             {nextCursor && (
               <div className="flex justify-center">

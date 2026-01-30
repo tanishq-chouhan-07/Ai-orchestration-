@@ -136,7 +136,7 @@ export default function RetentionPoliciesPage() {
     <DashboardLayout>
       <RoleGate role="admin">
         <div className="space-y-6">
-          <Card>
+          <Card className="fade-up stagger-1">
             <div className="flex flex-wrap items-end justify-between gap-4">
               <div>
                 <h1 className="text-2xl font-semibold">Retention policies</h1>
@@ -151,12 +151,12 @@ export default function RetentionPoliciesPage() {
           </Card>
 
           {(error ?? loadError) && (
-            <Card>
+            <Card className="fade-up stagger-2">
               <p className="text-sm text-danger">{error ?? loadError}</p>
             </Card>
           )}
 
-          <Card>
+          <Card className="fade-up stagger-2">
             <h2 className="text-lg font-semibold">Create policy</h2>
             <div className="mt-4 grid gap-4 md:grid-cols-[2fr_2fr_1fr_auto]">
               <label className="flex flex-col gap-2 text-sm">
@@ -212,10 +212,13 @@ export default function RetentionPoliciesPage() {
               <Skeleton className="h-32" />
             ) : (
               <div className="space-y-6">
-                {instances.map((instance) => {
+                {instances.map((instance, index) => {
                   const instancePolicies = policyByInstance[instance.id] ?? [];
                   return (
-                    <Card key={instance.id}>
+                    <Card
+                      key={instance.id}
+                      className={`fade-up ${index % 4 === 0 ? "stagger-1" : index % 4 === 1 ? "stagger-2" : index % 4 === 2 ? "stagger-3" : "stagger-4"}`}
+                    >
                       <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
                         <div>
                           <h3 className="text-base font-semibold">{instance.name}</h3>

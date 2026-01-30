@@ -67,7 +67,7 @@ export default function ExecutionsPage() {
   return (
     <DashboardLayout>
       <div className="space-y-6">
-        <Card>
+        <Card className="fade-up stagger-1">
           <h2 className="text-lg font-semibold">Filters</h2>
           <div className="mt-4 grid gap-4 md:grid-cols-3">
             <select
@@ -118,15 +118,27 @@ export default function ExecutionsPage() {
             ))}
           </div>
         ) : data.length === 0 ? (
-          <EmptyState title="No executions found" description="Try a different filter." />
+          <div className="fade-up stagger-2">
+            <EmptyState
+              title="No executions found"
+              description="Try a different filter."
+              action={
+                <Button variant="secondary" onClick={() => reload()} disabled={busy}>
+                  Refresh
+                </Button>
+              }
+            />
+          </div>
         ) : (
-          <ExecutionHistory
-            executions={data}
-            busy={busy}
-            onRetry={retryExecution}
-            onView={viewExecution}
-            onDelete={deleteExecution}
-          />
+          <div className="fade-up stagger-2">
+            <ExecutionHistory
+              executions={data}
+              busy={busy}
+              onRetry={retryExecution}
+              onView={viewExecution}
+              onDelete={deleteExecution}
+            />
+          </div>
         )}
       </div>
       <Modal open={detailOpen} onClose={() => setDetailOpen(false)} title="Execution details">

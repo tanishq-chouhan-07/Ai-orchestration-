@@ -60,12 +60,22 @@ export default function WorkflowTable({
               {workflow.updatedAt ? new Date(workflow.updatedAt).toLocaleString() : "-"}
             </TableCell>
             <TableCell className="text-right">
-              <Button
-                variant={workflow.active ? "secondary" : "primary"}
+              <button
+                type="button"
                 onClick={() => onToggle(workflow.id, Boolean(workflow.active))}
+                aria-pressed={Boolean(workflow.active)}
+                className={`relative inline-flex h-8 w-14 items-center rounded-full border transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${
+                  workflow.active
+                    ? "border-primary/40 bg-primary/20 shadow-[0_0_14px_rgba(99,102,241,0.35)]"
+                    : "border-border bg-background"
+                }`}
               >
-                {workflow.active ? "Deactivate" : "Activate"}
-              </Button>
+                <span
+                  className={`inline-flex h-6 w-6 transform items-center justify-center rounded-full bg-card shadow transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${
+                    workflow.active ? "translate-x-7" : "translate-x-1"
+                  }`}
+                />
+              </button>
               {onView && (
                 <Button variant="secondary" className="ml-2" onClick={() => onView(workflow.id)}>
                   View

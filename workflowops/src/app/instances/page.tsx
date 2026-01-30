@@ -110,7 +110,7 @@ export default function InstancesPage() {
   return (
     <DashboardLayout>
       <div className="space-y-6">
-        <Card>
+        <Card className="fade-up stagger-1">
           <h2 className="text-lg font-semibold">Add instance</h2>
           <div className="mt-4 grid gap-4 md:grid-cols-3">
             <div>
@@ -132,7 +132,7 @@ export default function InstancesPage() {
           </Button>
         </Card>
 
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between fade-up stagger-2">
           <h2 className="text-lg font-semibold">Instances</h2>
           <Button variant="secondary" onClick={() => reload()} disabled={loading}>
             Refresh
@@ -149,16 +149,28 @@ export default function InstancesPage() {
           </div>
         ) : (
           <div className="grid gap-4 md:grid-cols-2">
-            {data.map((instance) => (
+            {data.map((instance, index) => (
               <InstanceCard
                 key={instance.id}
                 instance={instance}
                 onDelete={handleDelete}
                 onEdit={openEdit}
+                className={`fade-up ${index % 4 === 0 ? "stagger-1" : index % 4 === 1 ? "stagger-2" : index % 4 === 2 ? "stagger-3" : "stagger-4"}`}
               />
             ))}
             {data.length === 0 && (
-              <EmptyState title="No instances yet" description="Add an instance to get started." />
+              <EmptyState
+                title="No instances yet"
+                description="Add an instance to get started."
+                action={
+                  <Button
+                    variant="secondary"
+                    onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+                  >
+                    Add instance
+                  </Button>
+                }
+              />
             )}
           </div>
         )}

@@ -15,11 +15,12 @@ type TrendPoint = { date: string; successRate: number };
 
 type SuccessRateChartProps = {
   points: TrendPoint[];
+  className?: string;
 };
 
-export default function SuccessRateChart({ points }: SuccessRateChartProps) {
+export default function SuccessRateChart({ points, className }: SuccessRateChartProps) {
   return (
-    <Card className="space-y-3">
+    <Card className={`space-y-3 ${className ?? ""}`}>
       <h3 className="text-sm font-semibold">Success rate</h3>
       <div className="h-48">
         <ResponsiveContainer width="100%" height="100%">

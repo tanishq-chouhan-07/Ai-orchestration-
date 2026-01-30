@@ -43,8 +43,14 @@ export default function LoginPage() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <Card className="w-full max-w-md">
-        <h1 className="text-2xl font-semibold">Sign in</h1>
+      <Card className="w-full max-w-md glass-panel">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-xs uppercase text-muted">WorkflowOps</p>
+            <h1 className="text-2xl font-semibold tracking-tight">Sign in</h1>
+          </div>
+          <span className="rounded-full border border-border px-3 py-1 text-xs text-muted">Secure</span>
+        </div>
         <p className="mt-2 text-sm text-muted">
           Use your WorkflowOps account to continue.
         </p>

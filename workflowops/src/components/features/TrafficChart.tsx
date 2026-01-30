@@ -15,11 +15,12 @@ type TrendPoint = { date: string; total: number };
 
 type TrafficChartProps = {
   points: TrendPoint[];
+  className?: string;
 };
 
-export default function TrafficChart({ points }: TrafficChartProps) {
+export default function TrafficChart({ points, className }: TrafficChartProps) {
   return (
-    <Card className="space-y-3">
+    <Card className={`space-y-3 ${className ?? ""}`}>
       <h3 className="text-sm font-semibold">Traffic</h3>
       <div className="h-48">
         <ResponsiveContainer width="100%" height="100%">

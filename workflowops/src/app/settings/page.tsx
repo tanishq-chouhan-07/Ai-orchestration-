@@ -11,7 +11,7 @@ export default function SettingsPage() {
   return (
     <DashboardLayout>
       <div className="space-y-6">
-        <Card>
+        <Card className="fade-up stagger-1">
           <h2 className="text-lg font-semibold">Profile</h2>
           <div className="mt-3 text-sm text-muted">
             <div>Email: {user?.email ?? "-"}</div>
@@ -19,7 +19,7 @@ export default function SettingsPage() {
             <div>Role: {user?.role ?? "viewer"}</div>
           </div>
         </Card>
-        <Card>
+        <Card className="fade-up stagger-2">
           <h2 className="text-lg font-semibold">Theme</h2>
           <div className="mt-3">
             <ThemeToggle />

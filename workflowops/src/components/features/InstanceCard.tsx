@@ -14,11 +14,16 @@ type InstanceCardProps = {
   instance: Instance;
   onDelete: (id: string) => void;
   onEdit?: (instance: Instance) => void;
+  className?: string;
 };
 
-export default function InstanceCard({ instance, onDelete, onEdit }: InstanceCardProps) {
+export default function InstanceCard({ instance, onDelete, onEdit, className }: InstanceCardProps) {
   return (
-    <Card className="flex flex-col gap-3">
+    <Card
+      className={`flex flex-col gap-3 transition-transform duration-200 hover:-translate-y-1 hover:shadow-xl dark:border-t dark:border-t-white/10 ${
+        className ?? ""
+      }`}
+    >
       <div className="flex items-start justify-between">
         <div>
           <h3 className="text-base font-semibold">{instance.name}</h3>

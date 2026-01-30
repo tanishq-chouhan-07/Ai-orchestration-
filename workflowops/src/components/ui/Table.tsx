@@ -3,18 +3,26 @@ import { cn } from "@/components/shared/cn";
 
 export function Table({ className, ...props }: HTMLAttributes<HTMLTableElement>) {
   return (
-    <div className="w-full overflow-hidden rounded-[var(--radius)] border border-border">
+    <div className="w-full overflow-hidden rounded-[var(--radius)] border border-border/60">
       <table className={cn("w-full text-left text-sm", className)} {...props} />
     </div>
   );
 }
 
 export function TableHead({ className, ...props }: HTMLAttributes<HTMLTableSectionElement>) {
-  return <thead className={cn("bg-card text-muted", className)} {...props} />;
+  return <thead className={cn("bg-card/40 text-muted", className)} {...props} />;
 }
 
 export function TableRow({ className, ...props }: HTMLAttributes<HTMLTableRowElement>) {
-  return <tr className={cn("border-b border-border last:border-none", className)} {...props} />;
+  return (
+    <tr
+      className={cn(
+        "border-b border-border/40 last:border-none transition-colors hover:bg-background/50 dark:hover:bg-white/5",
+        className
+      )}
+      {...props}
+    />
+  );
 }
 
 export function TableCell({ className, ...props }: HTMLAttributes<HTMLTableCellElement>) {
